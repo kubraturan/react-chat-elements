@@ -50,7 +50,8 @@ export class MessageBox extends Component {
                             className={classNames(
                                 positionCls,
                                 {'rce-mbox--clear-padding': thatAbsoluteTime},
-                                {'rce-mbox--clear-notch': !this.props.notch}
+                                {'rce-mbox--clear-notch': !this.props.notch},
+                                { 'messageFocus': this.props.id === this.props.messageCheck && this.props.messageFocus === true },
                             )}>
                             <div
                                 className='rce-mbox-body'

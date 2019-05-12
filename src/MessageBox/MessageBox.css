@@ -70,6 +70,20 @@
     position: relative;
 }
 
+.rce-mbox.messageFocus {
+    animation-iteration-count: 4;
+    -webkit-animation-iteration-count: 5;
+    -webkit-animation-name: example; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 1s; /* Safari 4.0 - 8.0 */
+    animation-name: messageFocus;
+    animation-duration: 1s;
+}
+
+@-webkit-keyframes messageFocus {
+    from {background-color: #fff;}
+    to {background-color: #a3a3a3a3;}
+}
+
 .rce-mbox.rce-mbox-right {
     float: right;
     margin-left: 5px;

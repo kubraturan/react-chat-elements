@@ -14,10 +14,22 @@ export class MessageList extends Component {
         this.state = {
             scrollBottom: 0,
             downButton: false,
+            messageFocus: false,
         };
 
         this.loadRef = this.loadRef.bind(this);
+        this.messageRef = this.messageRef.bind(this);
         this.onScroll = this.onScroll.bind(this);
+        this.messageRefs = [];
+    }
+
+    loadMessageCheck() {
+        if (this.props.messageCheck && this.props.messageCheck !== undefined){
+            var message = this.messageRefs.find(x => x.messageId === this.props.messageCheck);
+            if (message !== undefined) {
+                this.onScroll(message.ref, true)
+            }
+        }
     }
 
     checkScroll() {
@@ -41,6 +53,11 @@ export class MessageList extends Component {
         this.setState({
             scrollBottom: this.getBottom(this.mlistRef),
         }, this.checkScroll.bind(this));
+
+        // normalde aaşğıdai butodan yapılıyor ama bunuda kullanmamız lazım messagepropslar için
+        if (this.props.messageCheck !== null)
+            this.loadMessageCheck();
+        
     }
 
     getBottom(e) {
@@ -83,7 +100,24 @@ export class MessageList extends Component {
             this.props.cmpRef(ref);
     }
 
-    onScroll(e) {
+    messageRef(ref, messageId) {
+        var check = this.messageRefs.find(res => res.messageId === messageId);
+        if (check === undefined) {
+            this.messageRefs.push({
+                ref: ref,
+                messageId: messageId,
+            })
+        }
+    }
+
+    onScroll(e, message = false) {
+        if (message === true) {
+            this.setState({
+                messageFocus: true,
+            })
+                this.mlistRef.scrollTop = e.offsetTop-e.offsetHeight;
+            return;
+        }
         var bottom = this.getBottom(e.target);
         this.state.scrollBottom = bottom;
         if (this.props.toBottomHeight === '100%' || bottom > this.props.toBottomHeight) {
@@ -128,16 +162,22 @@ export class MessageList extends Component {
                     className='rce-mlist'>
                     {
                         this.props.dataSource.map((x, i) => (
-                            <MessageBox
-                                key={i}
-                                {...x}
-                                onOpen={this.props.onOpen && ((e) => this.onOpen(x, i, e))}
-                                onDownload={this.props.onDownload && ((e) => this.onDownload(x, i, e))}
-                                onTitleClick={this.props.onTitleClick && ((e) => this.onTitleClick(x, i, e))}
-                                onForwardClick={this.props.onForwardClick && ((e) => this.onForwardClick(x, i, e))}
-                                onClick={this.props.onClick && ((e) => this.onClick(x, i, e))}
-                                onContextMenu={this.props.onContextMenu && ((e) => this.onContextMenu(x, i, e))}
+                            <div 
+                                ref={ref =>  this.messageRef(ref, x.id)}>
+                                <MessageBox
+                                    key={i}
+                                    {...x}
+                                    messageCheck={this.props.messageCheck}
+                                    messageFocus={this.state.messageFocus}
+                                    onOpen={this.props.onOpen && ((e) => this.onOpen(x, i, e))}
+                                    onFocus={this.props.onFocus && ((e) => this.onFocus(x, i, e)) }
+                                    onDownload={this.props.onDownload && ((e) => this.onDownload(x, i, e))}
+                                    onTitleClick={this.props.onTitleClick && ((e) => this.onTitleClick(x, i, e))}
+                                    onForwardClick={this.props.onForwardClick && ((e) => this.onForwardClick(x, i, e))}
+                                    onClick={this.props.onClick && ((e) => this.onClick(x, i, e))}
+                                    onContextMenu={this.props.onContextMenu && ((e) => this.onContextMenu(x, i, e))}
                                 />
+                            </div>
                         ))
                     }
                 </div>
@@ -158,6 +198,13 @@ export class MessageList extends Component {
                         }
                     </div>
                 }
+                {
+                    <div
+                        className='rce-mlist-down-button-kbra'
+                        onClick={this.loadMessageCheck.bind(this)}>
+                        <FaChevronDown/>
+                    </div>
+                }
             </div>
         );
     }
@@ -175,6 +222,7 @@ MessageList.defaultProps = {
     toBottomHeight: 300,
     downButton: true,
     downButtonBadge: null,
+    messageCheck:1,
 };
 
 export default MessageList;

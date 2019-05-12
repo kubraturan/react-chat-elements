@@ -91,6 +91,7 @@ export class App extends Component {
                 }
 
                 return {
+                    id : Math.floor(Math.random() * 10),
                     position: (this.token() >= 1 ? 'right' : 'left'),
                     forwarded: true,
                     type: type,
@@ -122,7 +123,7 @@ export class App extends Component {
             case 'chat':
                 return {
                     id: String(Math.random()),
-                    avatar: `data:image/png;base64,${this.photo()}`,
+                    //avatar: `data:image/png;base64,${this.photo()}`,
                     avatarFlexible: true,
                     statusColor: 'lightgreen',
                     alt: loremIpsum({ count: 2, units: 'words' }),
@@ -153,7 +154,9 @@ export class App extends Component {
 
     addMessage() {
         var list = this.state.messageList;
-        list.push(this.random('message'));
+        //list.push(this.random('message'));
+        var a = Math.floor(Math.random() * 50);
+        list.push({id:a, text:"heyyy "+a});
         this.setState({
             messageList: list,
         });
