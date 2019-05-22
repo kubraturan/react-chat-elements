@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import './MessageList.css';
 
-import MessageBox from '../MessageBox/MessageBox';
+import {
+  MessageBox
+} from 'react-chat-elements';
 
 import FaChevronDown from 'react-icons/lib/fa/chevron-down';
 
@@ -55,8 +57,8 @@ export class MessageList extends Component {
         }, this.checkScroll.bind(this));
 
         // normalde aaşğıdai butodan yapılıyor ama bunuda kullanmamız lazım messagepropslar için
-        if (this.props.messageCheck !== null)
-            this.loadMessageCheck();
+        //if (this.props.messageCheck !== null)
+        //    this.loadMessageCheck();
         
     }
 
@@ -102,12 +104,18 @@ export class MessageList extends Component {
 
     messageRef(ref, messageId) {
         var check = this.messageRefs.find(res => res.messageId === messageId);
-        if (check === undefined) {
-            this.messageRefs.push({
-                ref: ref,
-                messageId: messageId,
-            })
+
+        if (check !== undefined) {
+            var index = this.messageRefs.indexOf(check);
+            if (index !== -1) {
+                this.messageRefs.splice(index, 1);
+            }
         }
+
+        this.messageRefs.push({
+            ref: ref,
+            messageId: messageId,
+        })
     }
 
     onScroll(e, message = false) {
@@ -115,7 +123,7 @@ export class MessageList extends Component {
             this.setState({
                 messageFocus: true,
             })
-                this.mlistRef.scrollTop = e.offsetTop-e.offsetHeight;
+            e.scrollIntoView({block: 'center', behavior: 'smooth'});
             return;
         }
         var bottom = this.getBottom(e.target);
@@ -222,7 +230,7 @@ MessageList.defaultProps = {
     toBottomHeight: 300,
     downButton: true,
     downButtonBadge: null,
-    messageCheck:1,
+    messageCheck:null,
 };
 
 export default MessageList;
