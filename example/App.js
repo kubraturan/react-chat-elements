@@ -155,7 +155,7 @@ export class App extends Component {
     addMessage() {
         var list = this.state.messageList;
         //list.push(this.random('message'));
-        var a = Math.floor(Math.random() * 50);
+        var a = Math.floor(Math.random() * 10);
         list.push({id:a, text:"heyyy "+a});
         this.setState({
             messageList: list,

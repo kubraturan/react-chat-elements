@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, } from 'react';
 import './MessageList.css';
 
 import {
-  MessageBox
-} from 'react-chat-elements';
+    MessageBox,
+} from '../MessageBox/MessageBox';
 
 import FaChevronDown from 'react-icons/lib/fa/chevron-down';
 
@@ -20,17 +20,19 @@ export class MessageList extends Component {
         };
 
         this.loadRef = this.loadRef.bind(this);
-        this.messageRef = this.messageRef.bind(this);
+        this.createReferenceOfMessage = this.createReferenceOfMessage.bind(this);
         this.onScroll = this.onScroll.bind(this);
         this.messageRefs = [];
     }
 
-    loadMessageCheck() {
-        if (this.props.messageCheck && this.props.messageCheck !== undefined){
-            var message = this.messageRefs.find(x => x.messageId === this.props.messageCheck);
-            if (message !== undefined) {
-                this.onScroll(message.ref, true)
-            }
+    scrollIntoMessage(focusedMessage) {
+        var message = this.messageRefs.find(x => x.messageId === focusedMessage);
+        if (message !== undefined) {
+            this.setState({
+                messageFocus: true,
+            }, () => {
+                message.ref.scrollIntoView({block: this.props.scrollBlock, behavior: 'smooth',});
+            });
         }
     }
 
@@ -49,17 +51,15 @@ export class MessageList extends Component {
         }
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps(nextProps) {
         if (!this.mlistRef)
             return;
         this.setState({
             scrollBottom: this.getBottom(this.mlistRef),
         }, this.checkScroll.bind(this));
 
-        // normalde aaşğıdai butodan yapılıyor ama bunuda kullanmamız lazım messagepropslar için
-        //if (this.props.messageCheck !== null)
-        //    this.loadMessageCheck();
-        
+        if (nextProps.focusedMessage)
+            this.scrollIntoMessage(nextProps.focusedMessage);
     }
 
     getBottom(e) {
@@ -102,7 +102,7 @@ export class MessageList extends Component {
             this.props.cmpRef(ref);
     }
 
-    messageRef(ref, messageId) {
+    createReferenceOfMessage(ref, messageId) {
         var check = this.messageRefs.find(res => res.messageId === messageId);
 
         if (check !== undefined) {
@@ -115,17 +115,10 @@ export class MessageList extends Component {
         this.messageRefs.push({
             ref: ref,
             messageId: messageId,
-        })
+        });
     }
 
-    onScroll(e, message = false) {
-        if (message === true) {
-            this.setState({
-                messageFocus: true,
-            })
-            e.scrollIntoView({block: 'center', behavior: 'smooth'});
-            return;
-        }
+    onScroll(e) {
         var bottom = this.getBottom(e.target);
         this.state.scrollBottom = bottom;
         if (this.props.toBottomHeight === '100%' || bottom > this.props.toBottomHeight) {
@@ -134,7 +127,7 @@ export class MessageList extends Component {
                 this.setState({
                     downButton: true,
                     scrollBottom: bottom,
-                })
+                });
             }
         } else {
             if (this.state.downButton !== false) {
@@ -142,7 +135,7 @@ export class MessageList extends Component {
                 this.setState({
                     downButton: false,
                     scrollBottom: bottom,
-                })
+                });
             }
         }
 
@@ -171,12 +164,12 @@ export class MessageList extends Component {
                     {
                         this.props.dataSource.map((x, i) => (
                             <div 
-                                ref={ref =>  this.messageRef(ref, x.id)}>
+                                ref={ref =>  this.createReferenceOfMessage(ref, x.id)}>
                                 <MessageBox
                                     key={i}
                                     {...x}
-                                    messageCheck={this.props.messageCheck}
-                                    messageFocus={this.state.messageFocus}
+                                    focusedMessage={this.props.focusedMessage}
+                                    messageFocus={x.id === this.props.focusedMessage && this.state.messageFocus}
                                     onOpen={this.props.onOpen && ((e) => this.onOpen(x, i, e))}
                                     onFocus={this.props.onFocus && ((e) => this.onFocus(x, i, e)) }
                                     onDownload={this.props.onDownload && ((e) => this.onDownload(x, i, e))}
@@ -206,13 +199,6 @@ export class MessageList extends Component {
                         }
                     </div>
                 }
-                {
-                    <div
-                        className='rce-mlist-down-button-kbra'
-                        onClick={this.loadMessageCheck.bind(this)}>
-                        <FaChevronDown/>
-                    </div>
-                }
             </div>
         );
     }
@@ -230,7 +216,8 @@ MessageList.defaultProps = {
     toBottomHeight: 300,
     downButton: true,
     downButtonBadge: null,
-    messageCheck:null,
+    focusedMessage: null,
+    scrollBlock: 'center',
 };
 
 export default MessageList;
